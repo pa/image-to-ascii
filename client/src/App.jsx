@@ -167,7 +167,7 @@ export default function App() {
           <AsciiInput
             value={asciiText}
             onChange={setAsciiText}
-            placeholder="Paste ASCII art here (use characters: @%#*+=-:. )"
+            placeholder="Paste ASCII art here (use characters: $@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\&quot;^`\'. )"
           />
           <div className="controls-section">
             <div className="control-group">
