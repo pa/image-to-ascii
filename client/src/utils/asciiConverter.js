@@ -1,4 +1,4 @@
-const DENSITY = '█▓▒░@%#*+=-:. ';
+const DENSITY = '$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^`\'. ';
 
 function calculateBrightness(r, g, b) {
   return 0.299 * r + 0.587 * g + 0.114 * b;
