@@ -13,13 +13,15 @@ import {
   getImageFilename
 } from './utils/asciiConverter';
 
+const SAFE_MAX_WIDTH = 500;
+
 export default function App() {
   const [appMode, setAppMode] = useState('imageToAscii');
   const [imageData, setImageData] = useState(null);
   const [asciiText, setAsciiText] = useState('');
   const [generatedImage, setGeneratedImage] = useState(null);
   const [mode, setMode] = useState('colored');
-  const [width, setWidth] = useState(100);
+  const [width, setWidth] = useState(200);
   const [zoom, setZoom] = useState(100);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -27,6 +29,7 @@ export default function App() {
   const [showControls, setShowControls] = useState(false);
   const [converting, setConverting] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [conversionStarted, setConversionStarted] = useState(false);
 
   const [monochromeAscii, setMonochromeAscii] = useState('');
   const [coloredAscii, setColoredAscii] = useState('');
@@ -34,7 +37,7 @@ export default function App() {
   const debounceRef = useRef(null);
 
   const runConversion = useCallback((pixels, outputWidth) => {
-    if (!pixels || !outputWidth) return;
+    if (!pixels || !outputWidth || outputWidth > SAFE_MAX_WIDTH) return;
     
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
@@ -72,14 +75,21 @@ export default function App() {
     }, 300);
   }, []);
 
+  const startConversion = useCallback(() => {
+    if (!imageData?.pixels || !width) return;
+    setConversionStarted(true);
+    runConversion(imageData.pixels, width);
+  }, [imageData, width, runConversion]);
+
   useEffect(() => {
-    if (imageData?.pixels) {
-      setWidth(imageData.originalWidth);
+    if (imageData?.originalWidth) {
+      const safeWidth = Math.min(imageData.originalWidth, SAFE_MAX_WIDTH);
+      setWidth(safeWidth);
     }
   }, [imageData]);
 
   useEffect(() => {
-    if (showControls && imageData?.pixels && width) {
+    if (conversionStarted && imageData?.pixels && width) {
       runConversion(imageData.pixels, width);
     }
     
@@ -91,7 +101,7 @@ export default function App() {
         clearTimeout(debounceRef.current);
       }
     };
-  }, [showControls, imageData, width, runConversion]);
+  }, [conversionStarted, imageData, width, runConversion]);
 
   useEffect(() => {
     if (asciiText && width) {
@@ -105,11 +115,17 @@ export default function App() {
   const handleImageProcessed = (data) => {
     setImageData(data);
     setShowControls(true);
+    setConversionStarted(false);
+    setMonochromeAscii('');
+    setColoredAscii('');
     setError(null);
   };
 
   const handleWidthChange = (newWidth) => {
     setWidth(newWidth);
+    if (conversionStarted) {
+      runConversion(imageData?.pixels, newWidth);
+    }
   };
 
   const currentAscii = mode === 'colored' ? coloredAscii : monochromeAscii;
@@ -208,24 +224,93 @@ export default function App() {
           />
           {showControls && imageData && (
             <>
+              <div className="controls-section">
+                <div className="control-group">
+                  <label>Mode</label>
+                  <div className="mode-toggle">
+                    <button
+                      className={mode === 'monochrome' ? 'active' : ''}
+                      onClick={() => setMode('monochrome')}
+                    >
+                      Monochrome
+                    </button>
+                    <button
+                      className={mode === 'colored' ? 'active' : ''}
+                      onClick={() => setMode('colored')}
+                    >
+                      Colored
+                    </button>
+                  </div>
+                </div>
+
+                <div className="control-group">
+                  <label>Resolution (Width: {width})</label>
+                  <div className="slider-container">
+                    <input
+                      type="range"
+                      min="100"
+                      max={SAFE_MAX_WIDTH}
+                      value={width}
+                      onChange={(e) => handleWidthChange(Number(e.target.value))}
+                    />
+                  </div>
+                </div>
+
+                <div className="control-group">
+                  <label>Zoom</label>
+                  <div className="zoom-controls">
+                    <button className="zoom-btn" onClick={handleZoomOut}>−</button>
+                    <span className="zoom-level">{zoom}%</span>
+                    <button className="zoom-btn" onClick={handleZoomIn}>+</button>
+                  </div>
+                </div>
+
+                <div className="action-buttons">
+                  {!conversionStarted ? (
+                    <button
+                      className="btn primary"
+                      onClick={startConversion}
+                    >
+                      ▶ Start Conversion
+                    </button>
+                  ) : converting ? (
+                    <button className="btn primary" disabled>
+                      ⏳ Converting...
+                    </button>
+                  ) : (
+                    <button
+                      className="btn primary"
+                      onClick={startConversion}
+                    >
+                      ▶ Re-convert
+                    </button>
+                  )}
+                  <button
+                    className="btn"
+                    onClick={handleCopy}
+                    disabled={!monochromeAscii || converting}
+                  >
+                    📋 {copySuccess ? 'Copied!' : 'Copy'}
+                  </button>
+                  <button
+                    className="btn"
+                    onClick={handleDownloadTxt}
+                    disabled={!monochromeAscii || converting}
+                  >
+                    📄 .txt
+                  </button>
+                  <button
+                    className="btn"
+                    onClick={handleDownloadHtml}
+                    disabled={!coloredAscii || converting}
+                  >
+                    🌈 .html
+                  </button>
+                </div>
+              </div>
+              
               <ProgressBar progress={progress} converting={converting} />
-              <Controls
-                mode={mode}
-                setMode={setMode}
-                width={width}
-                setWidth={handleWidthChange}
-                maxWidth={imageData.originalWidth}
-                zoom={zoom}
-                setZoom={setZoom}
-                onZoomIn={handleZoomIn}
-                onZoomOut={handleZoomOut}
-                converting={converting}
-                onCopy={handleCopy}
-                onDownloadTxt={handleDownloadTxt}
-                onDownloadHtml={handleDownloadHtml}
-                hasResult={!!monochromeAscii}
-                copySuccess={copySuccess}
-              />
+              
               <AsciiDisplay 
                 ascii={currentAscii} 
                 mode={mode} 
