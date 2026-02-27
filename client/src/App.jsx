@@ -1,13 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Header from './components/Header';
 import ImageUpload from './components/ImageUpload';
 import AsciiInput from './components/AsciiInput';
 import Controls from './components/Controls';
 import AsciiDisplay from './components/AsciiDisplay';
 import ImagePreview from './components/ImagePreview';
+import ProgressBar from './components/ProgressBar';
 import {
-  convertToMonochrome,
-  convertToColored,
   generateHtmlContent,
   getFilename,
   asciiToImage,
@@ -23,32 +22,55 @@ export default function App() {
   const [width, setWidth] = useState(100);
   const [zoom, setZoom] = useState(100);
   const [loading, setLoading] = useState(false);
-  const [processing, setProcessing] = useState(false);
   const [error, setError] = useState(null);
   const [copySuccess, setCopySuccess] = useState(false);
   const [showControls, setShowControls] = useState(false);
+  const [converting, setConverting] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const [monochromeAscii, setMonochromeAscii] = useState('');
   const [coloredAscii, setColoredAscii] = useState('');
+  const workerRef = useRef(null);
+  const debounceRef = useRef(null);
 
-  const runConversion = useCallback(() => {
-    if (imageData?.pixels && width) {
-      setProcessing(true);
-      try {
-        const safeWidth = Math.min(width, imageData.pixels[0]?.length || width);
-        const mono = convertToMonochrome(imageData.pixels, safeWidth);
-        const color = convertToColored(imageData.pixels, safeWidth);
-        setMonochromeAscii(mono);
-        setColoredAscii(color);
-      } catch (err) {
-        console.error('Error converting image:', err);
-        setMonochromeAscii('');
-        setColoredAscii('');
-      } finally {
-        setProcessing(false);
-      }
+  const runConversion = useCallback((pixels, outputWidth) => {
+    if (!pixels || !outputWidth) return;
+    
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
     }
-  }, [imageData, width]);
+    
+    debounceRef.current = setTimeout(() => {
+      setConverting(true);
+      setProgress(0);
+      
+      if (workerRef.current) {
+        workerRef.current.terminate();
+      }
+      
+      workerRef.current = new Worker(
+        new URL('./workers/asciiWorker.js', import.meta.url),
+        { type: 'module' }
+      );
+      
+      workerRef.current.onmessage = (e) => {
+        if (e.data.type === 'progress') {
+          setProgress(e.data.progress);
+        } else if (e.data.type === 'complete') {
+          setMonochromeAscii(e.data.monochrome);
+          setColoredAscii(e.data.colored);
+          setConverting(false);
+          setProgress(100);
+        } else if (e.data.error) {
+          setConverting(false);
+          setError(e.data.error);
+        }
+      };
+      
+      const safeWidth = Math.min(outputWidth, pixels[0]?.length || outputWidth);
+      workerRef.current.postMessage({ pixels, width: safeWidth, numWorkers: 4 });
+    }, 300);
+  }, []);
 
   useEffect(() => {
     if (imageData?.pixels) {
@@ -57,10 +79,19 @@ export default function App() {
   }, [imageData]);
 
   useEffect(() => {
-    if (showControls && imageData?.pixels) {
-      runConversion();
+    if (showControls && imageData?.pixels && width) {
+      runConversion(imageData.pixels, width);
     }
-  }, [width, showControls, imageData]);
+    
+    return () => {
+      if (workerRef.current) {
+        workerRef.current.terminate();
+      }
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, [showControls, imageData, width, runConversion]);
 
   useEffect(() => {
     if (asciiText && width) {
@@ -77,15 +108,8 @@ export default function App() {
     setError(null);
   };
 
-  const handleStartConversion = () => {
-    runConversion();
-  };
-
   const handleWidthChange = (newWidth) => {
     setWidth(newWidth);
-    if (monochromeAscii) {
-      runConversion();
-    }
   };
 
   const currentAscii = mode === 'colored' ? coloredAscii : monochromeAscii;
@@ -184,6 +208,7 @@ export default function App() {
           />
           {showControls && imageData && (
             <>
+              <ProgressBar progress={progress} converting={converting} />
               <Controls
                 mode={mode}
                 setMode={setMode}
@@ -194,8 +219,7 @@ export default function App() {
                 setZoom={setZoom}
                 onZoomIn={handleZoomIn}
                 onZoomOut={handleZoomOut}
-                onStartConversion={handleStartConversion}
-                processing={processing}
+                converting={converting}
                 onCopy={handleCopy}
                 onDownloadTxt={handleDownloadTxt}
                 onDownloadHtml={handleDownloadHtml}

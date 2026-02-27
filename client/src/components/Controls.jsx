@@ -8,8 +8,7 @@ export default function Controls({
   setZoom,
   onZoomIn,
   onZoomOut,
-  onStartConversion,
-  processing,
+  converting,
   onCopy,
   onDownloadTxt,
   onDownloadHtml,
@@ -59,31 +58,29 @@ export default function Controls({
       </div>
 
       <div className="action-buttons">
-        <button
-          className="btn primary"
-          onClick={onStartConversion}
-          disabled={processing}
-        >
-          {processing ? '⏳ Processing...' : '▶ Start Conversion'}
-        </button>
+        {converting && (
+          <button className="btn primary" disabled>
+            ⏳ Converting...
+          </button>
+        )}
         <button
           className="btn"
           onClick={onCopy}
-          disabled={!hasResult}
+          disabled={!hasResult || converting}
         >
           📋 {copySuccess ? 'Copied!' : 'Copy'}
         </button>
         <button
           className="btn"
           onClick={onDownloadTxt}
-          disabled={!hasResult}
+          disabled={!hasResult || converting}
         >
           📄 .txt
         </button>
         <button
           className="btn"
           onClick={onDownloadHtml}
-          disabled={!hasResult}
+          disabled={!hasResult || converting}
         >
           🌈 .html
         </button>
