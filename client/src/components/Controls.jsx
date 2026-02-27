@@ -3,8 +3,13 @@ export default function Controls({
   setMode,
   width,
   setWidth,
-  fontSize,
-  setFontSize,
+  maxWidth,
+  zoom,
+  setZoom,
+  onZoomIn,
+  onZoomOut,
+  onStartConversion,
+  processing,
   onCopy,
   onDownloadTxt,
   onDownloadHtml,
@@ -32,34 +37,35 @@ export default function Controls({
       </div>
 
       <div className="control-group">
-        <label>Resolution (Width)</label>
+        <label>Resolution (Width: {width})</label>
         <div className="slider-container">
           <input
             type="range"
-            min="50"
-            max="300"
+            min="100"
+            max={maxWidth || 1920}
             value={width}
             onChange={(e) => setWidth(Number(e.target.value))}
           />
-          <span>{width}</span>
         </div>
       </div>
 
       <div className="control-group">
-        <label>Font Size</label>
-        <div className="slider-container">
-          <input
-            type="range"
-            min="4"
-            max="16"
-            value={fontSize}
-            onChange={(e) => setFontSize(Number(e.target.value))}
-          />
-          <span>{fontSize}px</span>
+        <label>Zoom</label>
+        <div className="zoom-controls">
+          <button className="zoom-btn" onClick={onZoomOut}>−</button>
+          <span className="zoom-level">{zoom}%</span>
+          <button className="zoom-btn" onClick={onZoomIn}>+</button>
         </div>
       </div>
 
       <div className="action-buttons">
+        <button
+          className="btn primary"
+          onClick={onStartConversion}
+          disabled={processing}
+        >
+          {processing ? '⏳ Processing...' : '▶ Start Conversion'}
+        </button>
         <button
           className="btn"
           onClick={onCopy}
@@ -72,14 +78,14 @@ export default function Controls({
           onClick={onDownloadTxt}
           disabled={!hasResult}
         >
-          📄 Download .txt
+          📄 .txt
         </button>
         <button
           className="btn"
           onClick={onDownloadHtml}
           disabled={!hasResult}
         >
-          🌈 Download .html
+          🌈 .html
         </button>
       </div>
     </div>

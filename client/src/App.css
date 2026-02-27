@@ -186,7 +186,7 @@ body {
 }
 
 .slider-container input[type="range"] {
-  width: 120px;
+  width: 200px;
   height: 6px;
   -webkit-appearance: none;
   background: var(--border-color);
@@ -207,6 +207,39 @@ body {
   font-size: 13px;
   color: var(--text-primary);
   min-width: 40px;
+}
+
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.zoom-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.zoom-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.zoom-level {
+  font-size: 13px;
+  color: var(--text-primary);
+  min-width: 50px;
+  text-align: center;
 }
 
 .action-buttons {
@@ -270,8 +303,6 @@ body {
   padding: 20px;
   overflow: auto;
   max-height: calc(100vh - 350px);
-  display: flex;
-  justify-content: center;
 }
 
 .ascii-display pre {
@@ -281,6 +312,7 @@ body {
   line-height: 1;
   white-space: pre;
   color: var(--text-primary);
+  display: inline-block;
 }
 
 .ascii-display.colored pre {

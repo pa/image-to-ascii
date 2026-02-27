@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Header from './components/Header';
 import ImageUpload from './components/ImageUpload';
 import AsciiInput from './components/AsciiInput';
@@ -21,30 +21,21 @@ export default function App() {
   const [generatedImage, setGeneratedImage] = useState(null);
   const [mode, setMode] = useState('colored');
   const [width, setWidth] = useState(100);
-  const [fontSize, setFontSize] = useState(6);
+  const [zoom, setZoom] = useState(100);
   const [loading, setLoading] = useState(false);
+  const [processing, setProcessing] = useState(false);
   const [error, setError] = useState(null);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [showControls, setShowControls] = useState(false);
 
   const [monochromeAscii, setMonochromeAscii] = useState('');
   const [coloredAscii, setColoredAscii] = useState('');
 
-  useEffect(() => {
-    if (imageData?.pixels) {
-      try {
-        const outputWidth = imageData.width;
-        setWidth(Math.min(200, outputWidth));
-      } catch (err) {
-        console.error('Error calculating width:', err);
-        setWidth(100);
-      }
-    }
-  }, [imageData]);
-
-  useEffect(() => {
+  const runConversion = useCallback(() => {
     if (imageData?.pixels && width) {
+      setProcessing(true);
       try {
-        const safeWidth = Math.min(width, imageData.pixels[0]?.length || 200);
+        const safeWidth = Math.min(width, imageData.pixels[0]?.length || width);
         const mono = convertToMonochrome(imageData.pixels, safeWidth);
         const color = convertToColored(imageData.pixels, safeWidth);
         setMonochromeAscii(mono);
@@ -53,22 +44,48 @@ export default function App() {
         console.error('Error converting image:', err);
         setMonochromeAscii('');
         setColoredAscii('');
+      } finally {
+        setProcessing(false);
       }
     }
   }, [imageData, width]);
 
   useEffect(() => {
+    if (imageData?.pixels) {
+      setWidth(imageData.originalWidth);
+    }
+  }, [imageData]);
+
+  useEffect(() => {
+    if (showControls && imageData?.pixels) {
+      runConversion();
+    }
+  }, [width, showControls, imageData]);
+
+  useEffect(() => {
     if (asciiText && width) {
-      const img = asciiToImage(asciiText, width, fontSize * 2);
+      const img = asciiToImage(asciiText, width, 10);
       setGeneratedImage(img);
     } else {
       setGeneratedImage(null);
     }
-  }, [asciiText, width, fontSize]);
+  }, [asciiText, width]);
 
   const handleImageProcessed = (data) => {
     setImageData(data);
+    setShowControls(true);
     setError(null);
+  };
+
+  const handleStartConversion = () => {
+    runConversion();
+  };
+
+  const handleWidthChange = (newWidth) => {
+    setWidth(newWidth);
+    if (monochromeAscii) {
+      runConversion();
+    }
   };
 
   const currentAscii = mode === 'colored' ? coloredAscii : monochromeAscii;
@@ -131,6 +148,14 @@ export default function App() {
     document.body.removeChild(a);
   };
 
+  const handleZoomIn = () => {
+    setZoom(prev => Math.min(prev + 25, 400));
+  };
+
+  const handleZoomOut = () => {
+    setZoom(prev => Math.max(prev - 25, 25));
+  };
+
   return (
     <div className="app">
       <Header />
@@ -157,21 +182,33 @@ export default function App() {
             loading={loading}
             error={error}
           />
-          <Controls
-            mode={mode}
-            setMode={setMode}
-            width={width}
-            setWidth={setWidth}
-            fontSize={fontSize}
-            setFontSize={setFontSize}
-            onCopy={handleCopy}
-            onDownloadTxt={handleDownloadTxt}
-            onDownloadHtml={handleDownloadHtml}
-            hasResult={!!monochromeAscii}
-            copySuccess={copySuccess}
-            appMode={appMode}
-          />
-          <AsciiDisplay ascii={currentAscii} mode={mode} fontSize={fontSize} />
+          {showControls && imageData && (
+            <>
+              <Controls
+                mode={mode}
+                setMode={setMode}
+                width={width}
+                setWidth={handleWidthChange}
+                maxWidth={imageData.originalWidth}
+                zoom={zoom}
+                setZoom={setZoom}
+                onZoomIn={handleZoomIn}
+                onZoomOut={handleZoomOut}
+                onStartConversion={handleStartConversion}
+                processing={processing}
+                onCopy={handleCopy}
+                onDownloadTxt={handleDownloadTxt}
+                onDownloadHtml={handleDownloadHtml}
+                hasResult={!!monochromeAscii}
+                copySuccess={copySuccess}
+              />
+              <AsciiDisplay 
+                ascii={currentAscii} 
+                mode={mode} 
+                zoom={zoom}
+              />
+            </>
+          )}
         </>
       ) : (
         <>
@@ -192,19 +229,6 @@ export default function App() {
                   onChange={(e) => setWidth(Number(e.target.value))}
                 />
                 <span>{width}px</span>
-              </div>
-            </div>
-            <div className="control-group">
-              <label>Font Size</label>
-              <div className="slider-container">
-                <input
-                  type="range"
-                  min="4"
-                  max="16"
-                  value={fontSize}
-                  onChange={(e) => setFontSize(Number(e.target.value))}
-                />
-                <span>{fontSize}px</span>
               </div>
             </div>
             <div className="action-buttons">

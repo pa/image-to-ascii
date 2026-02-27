@@ -1,16 +1,10 @@
 const sharp = require('sharp');
-const path = require('path');
 
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
-const MAX_WIDTH = 300;
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 async function processImage(buffer, originalWidth, originalHeight) {
-  const targetWidth = Math.min(MAX_WIDTH, originalWidth);
-  const targetHeight = Math.round((originalHeight / originalWidth) * targetWidth);
-
   const resized = await sharp(buffer)
-    .resize(targetWidth, targetHeight, { fit: 'inside' })
     .raw()
     .toBuffer({ resolveWithObject: true });
 
@@ -57,7 +51,7 @@ function validateFile(file) {
   }
 
   if (file.size > MAX_FILE_SIZE) {
-    return { valid: false, error: 'File too large. Maximum size is 5MB.' };
+    return { valid: false, error: 'File too large. Maximum size is 10MB.' };
   }
 
   return { valid: true };
@@ -68,6 +62,5 @@ module.exports = {
   getImageMetadata,
   validateFile,
   ALLOWED_MIME_TYPES,
-  MAX_FILE_SIZE,
-  MAX_WIDTH
+  MAX_FILE_SIZE
 };
