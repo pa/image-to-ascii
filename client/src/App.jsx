@@ -13,8 +13,6 @@ import {
   getImageFilename
 } from './utils/asciiConverter';
 
-const SAFE_MAX_WIDTH = 500;
-
 export default function App() {
   const [appMode, setAppMode] = useState('imageToAscii');
   const [imageData, setImageData] = useState(null);
@@ -22,6 +20,7 @@ export default function App() {
   const [generatedImage, setGeneratedImage] = useState(null);
   const [mode, setMode] = useState('colored');
   const [width, setWidth] = useState(200);
+  const [maxWidth, setMaxWidth] = useState(1920);
   const [zoom, setZoom] = useState(100);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -37,7 +36,7 @@ export default function App() {
   const debounceRef = useRef(null);
 
   const runConversion = useCallback((pixels, outputWidth) => {
-    if (!pixels || !outputWidth || outputWidth > SAFE_MAX_WIDTH) return;
+    if (!pixels || !outputWidth) return;
     
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
@@ -83,8 +82,8 @@ export default function App() {
 
   useEffect(() => {
     if (imageData?.originalWidth) {
-      const safeWidth = Math.min(imageData.originalWidth, SAFE_MAX_WIDTH);
-      setWidth(safeWidth);
+      setWidth(imageData.originalWidth);
+      setMaxWidth(imageData.originalWidth);
     }
   }, [imageData]);
 
@@ -248,8 +247,8 @@ export default function App() {
                   <div className="slider-container">
                     <input
                       type="range"
-                      min="100"
-                      max={SAFE_MAX_WIDTH}
+                      min="50"
+                      max={maxWidth}
                       value={width}
                       onChange={(e) => handleWidthChange(Number(e.target.value))}
                     />

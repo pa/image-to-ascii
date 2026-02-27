@@ -1,0 +1,9 @@
+/Users/pramodhayyappan/dev/projects/image-to-ascii/image-to-ascii-tui/target/release/deps/signal_hook_registry-524ca7a6621cc25c.d: /Users/pramodhayyappan/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/signal-hook-registry-1.4.8/src/lib.rs /Users/pramodhayyappan/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/signal-hook-registry-1.4.8/src/half_lock.rs /Users/pramodhayyappan/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/signal-hook-registry-1.4.8/src/vec_map.rs
+
+/Users/pramodhayyappan/dev/projects/image-to-ascii/image-to-ascii-tui/target/release/deps/libsignal_hook_registry-524ca7a6621cc25c.rlib: /Users/pramodhayyappan/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/signal-hook-registry-1.4.8/src/lib.rs /Users/pramodhayyappan/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/signal-hook-registry-1.4.8/src/half_lock.rs /Users/pramodhayyappan/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/signal-hook-registry-1.4.8/src/vec_map.rs
+
+/Users/pramodhayyappan/dev/projects/image-to-ascii/image-to-ascii-tui/target/release/deps/libsignal_hook_registry-524ca7a6621cc25c.rmeta: /Users/pramodhayyappan/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/signal-hook-registry-1.4.8/src/lib.rs /Users/pramodhayyappan/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/signal-hook-registry-1.4.8/src/half_lock.rs /Users/pramodhayyappan/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/signal-hook-registry-1.4.8/src/vec_map.rs
+
+/Users/pramodhayyappan/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/signal-hook-registry-1.4.8/src/lib.rs:
+/Users/pramodhayyappan/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/signal-hook-registry-1.4.8/src/half_lock.rs:
+/Users/pramodhayyappan/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/signal-hook-registry-1.4.8/src/vec_map.rs:
