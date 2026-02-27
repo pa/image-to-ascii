@@ -1,4 +1,4 @@
-const DENSITY = '$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^`\'. ';
+const DENSITY = '█▓▒░▁▂▃▄▅▆▇█▉▊▋▌▍▎▏▐░▒▓▔▕▖▗▘▙▚▛▜▝▞▟$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^`\'. ';
 
 function calculateBrightness(r, g, b) {
   return 0.299 * r + 0.587 * g + 0.114 * b;
@@ -75,8 +75,8 @@ export function generateHtmlContent(coloredAscii) {
 }
 
 export function calculateOutputWidth(originalWidth) {
-  const calculated = Math.floor(originalWidth / 2);
-  return Math.min(200, Math.max(50, calculated));
+  const calculated = Math.floor(originalWidth / 1.5);
+  return Math.min(300, Math.max(80, calculated));
 }
 
 export function getFilename(extension) {

@@ -32,16 +32,16 @@ export default function Controls({
       </div>
 
       <div className="control-group">
-        <label>Output Width</label>
+        <label>Resolution (Width)</label>
         <div className="slider-container">
           <input
             type="range"
-            min="50"
-            max="200"
+            min="80"
+            max="300"
             value={width}
             onChange={(e) => setWidth(Number(e.target.value))}
           />
-          <span>{width} chars</span>
+          <span>{width}</span>
         </div>
       </div>
 
