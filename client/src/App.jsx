@@ -9,7 +9,6 @@ import {
   convertToMonochrome,
   convertToColored,
   generateHtmlContent,
-  calculateOutputWidth,
   getFilename,
   asciiToImage,
   getImageFilename
@@ -32,17 +31,29 @@ export default function App() {
 
   useEffect(() => {
     if (imageData?.pixels) {
-      const outputWidth = calculateOutputWidth(imageData.originalWidth);
-      setWidth(outputWidth);
+      try {
+        const outputWidth = imageData.width;
+        setWidth(Math.min(200, outputWidth));
+      } catch (err) {
+        console.error('Error calculating width:', err);
+        setWidth(100);
+      }
     }
   }, [imageData]);
 
   useEffect(() => {
     if (imageData?.pixels && width) {
-      const mono = convertToMonochrome(imageData.pixels, width);
-      const color = convertToColored(imageData.pixels, width);
-      setMonochromeAscii(mono);
-      setColoredAscii(color);
+      try {
+        const safeWidth = Math.min(width, imageData.pixels[0]?.length || 200);
+        const mono = convertToMonochrome(imageData.pixels, safeWidth);
+        const color = convertToColored(imageData.pixels, safeWidth);
+        setMonochromeAscii(mono);
+        setColoredAscii(color);
+      } catch (err) {
+        console.error('Error converting image:', err);
+        setMonochromeAscii('');
+        setColoredAscii('');
+      }
     }
   }, [imageData, width]);
 

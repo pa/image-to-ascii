@@ -3,7 +3,7 @@ const path = require('path');
 
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
-const MAX_WIDTH = 200;
+const MAX_WIDTH = 300;
 
 async function processImage(buffer, originalWidth, originalHeight) {
   const targetWidth = Math.min(MAX_WIDTH, originalWidth);

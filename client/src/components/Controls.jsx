@@ -36,7 +36,7 @@ export default function Controls({
         <div className="slider-container">
           <input
             type="range"
-            min="80"
+            min="50"
             max="300"
             value={width}
             onChange={(e) => setWidth(Number(e.target.value))}
