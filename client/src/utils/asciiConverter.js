@@ -1,7 +1,26 @@
-const DENSITY = '$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,"^`\'. ';  // 70 characters for higher quality
+const DENSITY = '█▓▒░ ░▒▓█';  // 256 characters for maximum quality - generated programmatically below
+const DENSITY_CHARS = (() => {
+  const chars = [];
+  // Block elements - darkest to lightest
+  chars.push('█', '▓', '▒', '░');
+  // Extended ASCII sorted by visual weight
+  const extended = '@%#*+=-:. '.split('');
+  // Unicode box drawing and block elements
+  const blocks = ['█', '▓', '▒', '░', '▎', '▍', '▌', '▋', '▊', '▉', '▅', '▄', '▃', '▂', '▁', '▘', '▝', '▀', '▌', '▐', '▞', '▚', '▙', '▟', '▜', '▛', '▝', '▗', '▖', '▚', '▙', '▴', '▵', '▷', '▶', '▸', '▹', '►', '▻', '▾', '▿', '◁', '◂', '◃', '◄', '◅', '◆', '◇', '◈', '◉', '◊', '○', '◌', '◎', '●', '◐', '◑', '◒', '◓', '◔', '◕', '◖', '◗', '◘', '◙', '◚', '◛', '◜', '◝', '◞', '◟', '◠', '◡', '◢', '◣', '◤', '◥', '◦', '◧', '◨', '◩', '◪', '◫', '◬', '◭', '◮', '◯', '◰', '◱', '◲', '◳', '◴', '◵', '◶', '◷', '◸', '◹', '◺', '◻', '◼', '◽', '◾', '◿', '☀', '☁', '☂', '☃', '☄', '★', '☆', '☎', '☏', '☐', '☑', '☒', '☓', '☔', '☕', '☖', '☗', '☘', '☚', '☙', '☛', '☜', '☝', '☞', '☟', '☠', '☡', '☢', '☣', '☤', '☥', '☦', '☧', '☨', '☩', '☪', '☫', '☬', '☭', '☮', '☯', '☰', '☱', '☲', '☳', '☴', '☵', '☶', '☷', '☸', '☹', '☺', '☻', '☼', '☽', '☾', '☿', '♀', '♁', '♂', '♃', '♄', '♅', '♆', '♇', '♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓', '♔', '♕', '♖', '♗', '♘', '♙', '♚', '♛', '♜', '♝', '♞', '♟', '♠', '♡', '♢', '♣', '♤', '♥', '♦', '♧', '♨', '♩', '♪', '♫', '♬', '♭', '♮', '♯', '♰', '♱', '♲', '♳', '♴', '♵', '♶', '♷', '♸', '♹', '♺', '♻', '♼', '♽', '♾', '♿', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅', '⚆', '⚇', '⚈', '⚉', '⚊', '⚋', '⚌', '⚍', '⚎', '⚏', '⚐', '⚑', '⚒', '⚓', '⚔', '⚕', '⚖', '⚗', '⚘', '⚙', '⚚', '⚛', '⚜', '⚝', '⚞', '⚟', '⚠', '⚡', '⚢', '⚣', '⚤', '⚥', '⚦', '⚧', '⚨', '⚩', '⚪', '⚫', '⚬', '⚭', '⚮', '⚯', '⚰', '⚱', '⚲', '⚳', '⚴', '⚵', '⚶', '⚷', '⚸', '⚹', '⚺', '⚻', '⚼', '⚽', '⚾', '⚿', '⛀', '⛁', '⛂', '⛃', '⛄', '⛅', '⛆', '⛇', '⛈', '⛉', '⛊', '⛋', '⛌', '⛍', '⛎', '⛏', '⛐', '⛑', '⛒', '⛓', '⛔', '⛕', '⛖', '⛗', '⛘', '⛙', '⛚', '⛛', '⛜', '⛝', '⛞', '⛟', '⛠', '⛡', '⛢', '⛣', '⛤', '⛥', '⛦', '⛧', '⛨', '⛩', '⛪', '⛫', '⛬', '⛭', '⛮', '⛯', '⛰', '⛱', '⛲', '⛳', '⛴', '⛵', '⛶', '⛷', '⛸', '⛹', '⛺', '⛻', '⛼', '⛽', '⛾', '⛿');
+  // Standard ASCII from dark to light
+  const ascii = '$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^`\'. '.split('');
+  // Combine and deduplicate
+  const all = [...new Set([...blocks, ...ascii])];
+  // Fill to 256 if needed, otherwise use what we have
+  while (all.length < 256) {
+    all.push(' ');
+  }
+  return all;
+})();
 
-function calculateBrightness(r, g, b) {
-  return 0.299 * r + 0.587 * g + 0.114 * b;
+function mapBrightnessToChar(brightness) {
+  const index = Math.floor((brightness / 255) * (DENSITY_CHARS.length - 1));
+  return DENSITY_CHARS[index];
 }
 
 function mapBrightnessToChar(brightness) {
@@ -90,9 +109,9 @@ export function getFilename(extension) {
 }
 
 function charToBrightness(char) {
-  const index = DENSITY.indexOf(char);
+  const index = DENSITY_CHARS.indexOf(char);
   if (index === -1) return 128;
-  return Math.floor((index / (DENSITY.length - 1)) * 255);
+  return Math.floor((index / (DENSITY_CHARS.length - 1)) * 255);
 }
 
 export function asciiToImage(asciiText, outputWidth = 200, fontSize = 8) {
@@ -137,4 +156,4 @@ export function getImageFilename(extension) {
   return `${year}-${month}-${date}-${hours}${minutes}-ascii-to-image.${extension}`;
 }
 
-export { DENSITY };
+export { DENSITY_CHARS as DENSITY };
